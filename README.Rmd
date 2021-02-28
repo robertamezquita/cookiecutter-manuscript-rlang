@@ -7,7 +7,83 @@ output: github_document
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## Rationale
+This repo provides a cookiecutter for the purpose of writing a manuscript that is largely driven by computational analyses. In addition, this cookiecutter provides a means to create websites for both the analysis side and the end manuscript based on the [Distill publication](https://distill.pub) web-format, a template that is optimized for scientific and technical communication.
+
+---
+## Requirements
+
+First, install `cookiecutter` via `pip install cookiecutter` or `brew install cookiecutter`.
+
+Next, run the code below to create a new directory based on the cookiecutter herein. The new directory will be customized based on how you answer an interactive series of questions.
+
+```
+cookiecutter gh:robertamezquita/cookiecutter-manuscript-rlang
+```
+
+And that's it! Your new repo is ready to roll.
+
+## Usage
+
+This site has three primary branches:
+
+* `_analysis` : the data science side of the project where analyses will be split across notebooks and preliminary figures/tables will be generated
+* `_manuscript` : the manuscript side where you'll compose both the primary text and final versions of figures/tables
+* `_submissions` : artifacts that contain the entirety of what is submitted for publication
+
+The `_analysis` and `_manuscript` branches are organized in such a way to facilitate the creation of a website for each aspect of the project. 
+
+To generate the template website to see for yourself, run:
+
+```
+# `make all` runs `_make-site.sh under the hood to create an
+# intermediate _build folder that is then rendered to _site
+cd _analysis
+make all 
+cd ../_manuscript
+make all
+```
+
+Navigating to the respective `_site` directories will bring you to each freshly generated website. Both of these websites are generated based on a configuration file `_site.yml` and the `_make-site.sh` script that runs under-the-hood of the `make` command, which can be modified as needed to reflect what should be available and where as content on the website.
+
+### What files are built/rendered for the website?
+
+Its important to note that the site is rendered *only based on what is provided inside of the `_build/` directory*. This is controlled by the build portion of the `_make-site.sh` script. The `_site.yml` file then controls what files from the `_build` directory are included or excluded from the final `_site` directory. Thus, ensuring that these two files - `_make-site.sh` and `_site.yml` - reflect your desired settings is crucial.
+
+These two files can (and should!) be modified to copy only the content necessary to build and render the site. The analysis and manuscript sides each have their own defaults explained below.
+
+### Customizing the website
+
+In both the analysis and manuscript sides, the `_site.yml` controls how the website is structured via the navigation specification. _However, this is **not** synonymous with what is built/rendered_. Aspects that are built/rendered will not be included in the site if they are not called from within the `_site.yml` file.
+
+### Building the analysis website
+
+The `_analysis` side's website by default is rendered based on only on the content within `_notebooks`. The reason for this design choice is that the `_eda` section of the `_analysis` side should be treated as "the playground" where you can do whatever you like. Eventually however, you'll hit upon some results that should be formalized and communicated to an audience. This is the time when you "promote" an analysis to a notebook, which will be clearly laid out and ensured to be runnable/reproducible.
+
+Note that when rendering, it will run a fresh R instance and walk through the notebooks in sequential order to render each `.Rmd` (_be sure to name each `.Rmd` uniquely and with prefixes that correctly denote the order of operations!_). 
+
+The script however by default ignores any file with `_deprecated` as part of its path (e.g. inside such a directory). Thus, once a notebook has become irrelevant, place it into the `_deprecated` directory to keep it as an archival record but not continue building/rendering it as the site gets made.
+
+Finally, the entire build process - create `_build`, render `_site`, destroy `_build` - can be done via `make all`. The `make build`, `make render`, and `make clean` (destroys both `_build` and `_site`) subcommands discretizes the various steps.
+
+#### Bypassing expensive calculations
+
+Depending on the analysis, this may take a while, and may necessitate intermediate caching or creation of intermediate files that can be reloaded when rendering the `.Rmd` to avoid costly calculations. Note however that if a cache is created via the default `knitr` methodology, this cache will be erased each time the website is built, as the cache is placed inside of the `_build` directory (which is continually regenerated each time). Thus, change the cache location by modifying the `knitr` settings. Another strategy is to generate intermediate `.rda`/`.rds` files that capture expensive calculations, and then set `eval=FALSE` for the chunks that should only be regenerated manually. However, this strategy has its own weakness in that it breaks the ability to reliably reproduce the workflow.
+
+### Building the manuscript site
+
+The `_manuscript` side's website can be a bit more free-form, as it is rendered based on all the `.Rmd` content within the section folders as all of them are copied into the `_build` folder. _This is because the manuscript side should really only contain prose_. This makes it easy and quick to render the website. The `.Rmd` files should reference objects in the `_figures`, `_tables`, and `_resources` directories as needed for necessary content.
+
+#### Building the final manuscript
+
+Of course, while the website is a great add-on, there still is the matter of generating the _final_ manuscript, which is the composite of all the individual sections of the paper. An initial take of this can be done by running `make preview`. This will create a preview of the final composition, which is great because it will automagically generate all the necessary citations and bibliography.
+
+Inevitably however there may still be work required to finalize the manuscript into a submission ready artifact. Thus, once such is done, the final manuscript artifact can be placed into the `_submission` directory.
+
+
+---
+## Structure & Rationale
+
+### Rationale
 
 Manuscripts are finicky things, in that there are myriad complications. Indeed, there is an art to putting together a manuscript, as it involves the management of various moving parts - primary text, figures, tables, and any other supplementary material. Dealing with all this as a single person is difficult enough as it is, and once other people are introduced, it becomes an exponential mess. 
 
@@ -22,50 +98,6 @@ Furthermore, this structure supports the creation of a reproducible workflow. Th
 Lastly, we want to make this all accessible to a wide audience, in a way that is both portable and - dare I say - beautiful. To this end, the cookiecutter is organized to allow for the rendering of a manuscript as a website (where each main section could be its own page and tables/figures can be placed as needed) as well as a website to feature viewable ongoing analytical work. For that, we are using the [Distill for R Markdown](https://rstudio.github.io/distill/) format that is optimized for scientific and technical communication.
 
 The focus of this cookiecutter is really towards the writing of academic manuscripts - as it contains explicit callouts to figures, tables, and the written word. More broadly however, it is focused on the *communication* of scientific concepts, building *trust* through a navigable file hierarchy, and ensuring *functionality* by implicitly supporting workflow-infrastructure tooling. 
-
-
-## Requirements
-
-Install `cookiecutter` using `pip`:
-
-```
-pip install cookiecutter
-```
-
-OR
-
-`homebrew`:
-
-```
-brew install cookiecutter
-```
-
-OR
-
-`conda`:
-
-```
-conda install -c conda-forge cookiecutter
-```
-
-## Usage
-
-Generate a new directory using:
-
-```
-cookiecutter gh:<robertamezquita/cookiecutter-manuscript-rlang
-```
-
-If this doesn't work try using SSH with the full path:
-
-```
-cookiecutter git+ssh://git@github.com/robertamezquita/cookiecutter-manuscript-rlang.git
-```
-
-You will then be asked some questions to set up your project. Leaving answers
-blank will select the default (shown in [brackets]).
-
-## Structure & Rationale
 
 ### Overview
 

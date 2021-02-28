@@ -4,10 +4,13 @@ clean:
 	rm -Rf _build/; rm -Rf _site/
 	
 build:
-	./.make-site.sh build
+	./_make-site.sh build
 
 render:
-	./.make-site.sh render
+	./_make-site.sh render
 
 remove-build:
 	rm -Rf _build
+
+preview:
+	./_compose-manuscript.sh

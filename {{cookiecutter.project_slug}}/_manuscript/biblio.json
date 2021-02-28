@@ -1,0 +1,4 @@
+# The bibliography should be created using the CSL-JSON format
+# as it is native to the rendering engine pandoc-citeproc
+# See https://citeproc-js.readthedocs.io/en/latest/csl-json/markup.html
+# for details on the schema

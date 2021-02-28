@@ -1,0 +1,1 @@
+Similar to the `_analysis` section, this directory will contain archival scraps that should not be a part of the final product.

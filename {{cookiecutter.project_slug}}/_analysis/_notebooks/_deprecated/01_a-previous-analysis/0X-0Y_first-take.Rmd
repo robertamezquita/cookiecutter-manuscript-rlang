@@ -1,7 +1,7 @@
 ---
-title: "First step"
+title: "First take"
 description: |
-  "Step 1 of notebook 1."
+  "My first take at this analysis"
 author:
   - name: "{{cookiecutter.full_name}}"
     orcid_id: "{{cookiecutter.orcid_id}}"
@@ -16,6 +16,4 @@ output: distill::distill_article
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-First step in the first objective notebook.
-
-Notebooks should be ensured to run, and in fact go through this check via the build/rendering process to make the website.
+This is an example of a notebook that has been _deprecated_. By default, notebooks placed inside this folder will be ignored by the build/render process of making the final analysis website. This is a good spot to place notebooks that you want to keep as reference but are no longer relevant or have been superseded.
