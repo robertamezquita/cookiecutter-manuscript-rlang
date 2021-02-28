@@ -26,7 +26,100 @@ body {
 <body>
 
 <h1 id="cookiecutter-for-data-science-driven-manuscript-writing">Cookiecutter for Data Science Driven Manuscript Writing</h1>
-<h2 id="rationale">Rationale</h2>
+<p>This repo provides a cookiecutter for the purpose of writing a manuscript that is largely driven by computational analyses. In addition, this cookiecutter provides a means to create websites for both the analysis side and the end manuscript based on the <a href="https://distill.pub">Distill publication</a> web-format, a template that is optimized for scientific and technical communication.</p>
+<table>
+<tbody>
+<tr class="odd">
+<td>## Requirements</td>
+</tr>
+<tr class="even">
+<td>First, install <code>cookiecutter</code> via <code>pip install cookiecutter</code> or <code>brew install cookiecutter</code>.</td>
+</tr>
+<tr class="odd">
+<td>Next, run the code below to create a new directory based on the cookiecutter herein. The new directory will be customized based on how you answer an interactive series of questions.</td>
+</tr>
+<tr class="even">
+<td><code>cookiecutter gh:robertamezquita/cookiecutter-manuscript-rlang</code></td>
+</tr>
+<tr class="odd">
+<td>And that’s it! Your new repo is ready to roll.</td>
+</tr>
+<tr class="even">
+<td>## Usage</td>
+</tr>
+<tr class="odd">
+<td>This site has three primary branches:</td>
+</tr>
+<tr class="even">
+<td>* <code>_analysis</code> : the data science side of the project where analyses will be split across notebooks and preliminary figures/tables will be generated * <code>_manuscript</code> : the manuscript side where you’ll compose both the primary text and final versions of figures/tables * <code>_submissions</code> : artifacts that contain the entirety of what is submitted for publication</td>
+</tr>
+<tr class="odd">
+<td>The <code>_analysis</code> and <code>_manuscript</code> branches are organized in such a way to facilitate the creation of a website for each aspect of the project.</td>
+</tr>
+<tr class="even">
+<td>To generate the template website to see for yourself, run:</td>
+</tr>
+<tr class="odd">
+<td><code># `make all` runs `_make-site.sh under the hood to create an # intermediate _build folder that is then rendered to _site cd _analysis make all cd ../_manuscript make all</code></td>
+</tr>
+<tr class="even">
+<td>Navigating to the respective <code>_site</code> directories will bring you to each freshly generated website. Both of these websites are generated based on a configuration file <code>_site.yml</code> and the <code>_make-site.sh</code> script that runs under-the-hood of the <code>make</code> command, which can be modified as needed to reflect what should be available and where as content on the website.</td>
+</tr>
+<tr class="odd">
+<td>### What files are built/rendered for the website?</td>
+</tr>
+<tr class="even">
+<td>Its important to note that the site is rendered <em>only based on what is provided inside of the <code>_build/</code> directory</em>. This is controlled by the build portion of the <code>_make-site.sh</code> script. The <code>_site.yml</code> file then controls what files from the <code>_build</code> directory are included or excluded from the final <code>_site</code> directory. Thus, ensuring that these two files - <code>_make-site.sh</code> and <code>_site.yml</code> - reflect your desired settings is crucial.</td>
+</tr>
+<tr class="odd">
+<td>These two files can (and should!) be modified to copy only the content necessary to build and render the site. The analysis and manuscript sides each have their own defaults explained below.</td>
+</tr>
+<tr class="even">
+<td>### Customizing the website</td>
+</tr>
+<tr class="odd">
+<td>In both the analysis and manuscript sides, the <code>_site.yml</code> controls how the website is structured via the navigation specification. <em>However, this is <strong>not</strong> synonymous with what is built/rendered</em>. Aspects that are built/rendered will not be included in the site if they are not called from within the <code>_site.yml</code> file.</td>
+</tr>
+<tr class="even">
+<td>### Building the analysis website</td>
+</tr>
+<tr class="odd">
+<td>The <code>_analysis</code> side’s website by default is rendered based on only on the content within <code>_notebooks</code>. The reason for this design choice is that the <code>_eda</code> section of the <code>_analysis</code> side should be treated as “the playground” where you can do whatever you like. Eventually however, you’ll hit upon some results that should be formalized and communicated to an audience. This is the time when you “promote” an analysis to a notebook, which will be clearly laid out and ensured to be runnable/reproducible.</td>
+</tr>
+<tr class="even">
+<td>Note that when rendering, it will run a fresh R instance and walk through the notebooks in sequential order to render each <code>.Rmd</code> (<em>be sure to name each <code>.Rmd</code> uniquely and with prefixes that correctly denote the order of operations!</em>).</td>
+</tr>
+<tr class="odd">
+<td>The script however by default ignores any file with <code>_deprecated</code> as part of its path (e.g. inside such a directory). Thus, once a notebook has become irrelevant, place it into the <code>_deprecated</code> directory to keep it as an archival record but not continue building/rendering it as the site gets made.</td>
+</tr>
+<tr class="even">
+<td>Finally, the entire build process - create <code>_build</code>, render <code>_site</code>, destroy <code>_build</code> - can be done via <code>make all</code>. The <code>make build</code>, <code>make render</code>, and <code>make clean</code> (destroys both <code>_build</code> and <code>_site</code>) subcommands discretizes the various steps.</td>
+</tr>
+<tr class="odd">
+<td>#### Bypassing expensive calculations</td>
+</tr>
+<tr class="even">
+<td>Depending on the analysis, this may take a while, and may necessitate intermediate caching or creation of intermediate files that can be reloaded when rendering the <code>.Rmd</code> to avoid costly calculations. Note however that if a cache is created via the default <code>knitr</code> methodology, this cache will be erased each time the website is built, as the cache is placed inside of the <code>_build</code> directory (which is continually regenerated each time). Thus, change the cache location by modifying the <code>knitr</code> settings. Another strategy is to generate intermediate <code>.rda</code>/<code>.rds</code> files that capture expensive calculations, and then set <code>eval=FALSE</code> for the chunks that should only be regenerated manually. However, this strategy has its own weakness in that it breaks the ability to reliably reproduce the workflow.</td>
+</tr>
+<tr class="odd">
+<td>### Building the manuscript site</td>
+</tr>
+<tr class="even">
+<td>The <code>_manuscript</code> side’s website can be a bit more free-form, as it is rendered based on all the <code>.Rmd</code> content within the section folders as all of them are copied into the <code>_build</code> folder. <em>This is because the manuscript side should really only contain prose</em>. This makes it easy and quick to render the website. The <code>.Rmd</code> files should reference objects in the <code>_figures</code>, <code>_tables</code>, and <code>_resources</code> directories as needed for necessary content.</td>
+</tr>
+<tr class="odd">
+<td>#### Building the final manuscript</td>
+</tr>
+<tr class="even">
+<td>Of course, while the website is a great add-on, there still is the matter of generating the <em>final</em> manuscript, which is the composite of all the individual sections of the paper. An initial take of this can be done by running <code>make preview</code>. This will create a preview of the final composition, which is great because it will automagically generate all the necessary citations and bibliography.</td>
+</tr>
+<tr class="odd">
+<td>Inevitably however there may still be work required to finalize the manuscript into a submission ready artifact. Thus, once such is done, the final manuscript artifact can be placed into the <code>_submission</code> directory.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="structure--rationale">Structure &amp; Rationale</h2>
+<h3 id="rationale">Rationale</h3>
 <p>Manuscripts are finicky things, in that there are myriad complications. Indeed, there is an art to putting together a manuscript, as it involves the management of various moving parts - primary text, figures, tables, and any other supplementary material. Dealing with all this as a single person is difficult enough as it is, and once other people are introduced, it becomes an exponential mess.</p>
 <p>Complicating all this is computational analyses. More and more it is recognized as a crucial part of a generating a publication. But all too often, this code is left as a pile of spaghetti that is uninterpretable to outside audiences, and even likely your future self.</p>
 <p>So, this cookiecutter seeks to address some of the problems that we <em>can</em> handle. Things like making computational analyses <em>reproducible, accessible, portable, and all that.</em> With regards to the manuscript creation, there is a great cross-platform tool - markdown - that will prevent the nightmare situation of “that one time a collaborator wanted you to add one last reference and you had to manually renumber <em>all</em> of your references because something broke.” And of course, tables and figures should all be kept in a place right next to the writing as separate assets.</p>
@@ -34,22 +127,6 @@ body {
 <p>Furthermore, this structure supports the creation of a reproducible workflow. This encompasses modern best practices in data science. The <a href="https://docs.ropensci.org/targets/index.html"><code>targets</code></a> R package home page contains many resources on how to get started with learning how to create and manage reproducible workflows. In brief, the key concepts are those of <em>provenance</em> (tracking the origin, location, and history of an object) and <em>reproducibility</em> through the running of computation contingent on changes to a data’s provenance. While providing such tools is well beyond the scope of this cookiecutter, the design herein is inspired by such concepts and supports it through providing a navigable file hierarchy.</p>
 <p>Lastly, we want to make this all accessible to a wide audience, in a way that is both portable and - dare I say - beautiful. To this end, the cookiecutter is organized to allow for the rendering of a manuscript as a website (where each main section could be its own page and tables/figures can be placed as needed) as well as a website to feature viewable ongoing analytical work. For that, we are using the <a href="https://rstudio.github.io/distill/">Distill for R Markdown</a> format that is optimized for scientific and technical communication.</p>
 <p>The focus of this cookiecutter is really towards the writing of academic manuscripts - as it contains explicit callouts to figures, tables, and the written word. More broadly however, it is focused on the <em>communication</em> of scientific concepts, building <em>trust</em> through a navigable file hierarchy, and ensuring <em>functionality</em> by implicitly supporting workflow-infrastructure tooling.</p>
-<h2 id="requirements">Requirements</h2>
-<p>Install <code>cookiecutter</code> using <code>pip</code>:</p>
-<pre><code>pip install cookiecutter</code></pre>
-<p>OR</p>
-<p><code>homebrew</code>:</p>
-<pre><code>brew install cookiecutter</code></pre>
-<p>OR</p>
-<p><code>conda</code>:</p>
-<pre><code>conda install -c conda-forge cookiecutter</code></pre>
-<h2 id="usage">Usage</h2>
-<p>Generate a new directory using:</p>
-<pre><code>cookiecutter gh:&lt;robertamezquita/cookiecutter-manuscript-rlang</code></pre>
-<p>If this doesn’t work try using SSH with the full path:</p>
-<pre><code>cookiecutter git+ssh://git@github.com/robertamezquita/cookiecutter-manuscript-rlang.git</code></pre>
-<p>You will then be asked some questions to set up your project. Leaving answers blank will select the default (shown in [brackets]).</p>
-<h2 id="structure--rationale">Structure &amp; Rationale</h2>
 <h3 id="overview">Overview</h3>
 <p>Starting with the total structure, and descriptions for each component describing its intended use.</p>
 <ul>
