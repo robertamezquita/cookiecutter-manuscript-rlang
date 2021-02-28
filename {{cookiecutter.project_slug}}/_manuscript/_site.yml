@@ -1,0 +1,34 @@
+name: "test"
+title: "{{cookiecutter.project_name}}"
+description: |
+  "{{cookiecutter.project_desc}}"
+
+# ---
+include: ["_resources", "_figures", "_tables"]
+exclude: ["*.afdesign", "*.afpub", "*.ai"]
+output_dir: "../_site" # assumes site is rendered inside _build dir
+navbar:
+  logo:
+    image: _figures/_assets/logo.png
+  search: true
+  right:
+    - text: "Home"
+      href: index.html
+    - text: "About"
+      href: about.html
+    - text: "Articles"
+      menu:
+        - text: "Section 1"
+        - text: "Article 1"
+          href: 01-01_article.html
+        - text: "Section 2"
+        - text: "Article 1"
+          href: 02-01_article.html
+    - icon: fab fa-gitlab
+      href: "{{cookiecutter.project_url}}"
+
+# ---
+output:
+  distill::distill_article:
+    highlight: haddock
+    toc: true

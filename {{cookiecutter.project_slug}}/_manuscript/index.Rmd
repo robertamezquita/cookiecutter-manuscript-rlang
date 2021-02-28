@@ -1,0 +1,23 @@
+---
+title: "{{cookiecutter.project_name}}"
+description: |
+  "{{cookiecutter.project_desc}}"
+author:
+  - name: "{{cookiecutter.full_name}}",
+    orcid_id: "{{cookiecutter.orcid_id}}",
+    url: "{{cookiecutter.personal_url}}"
+    affiliation: "{{cookiecutter.affiliation}}"
+    affiliation_url: "{{cookiecutter.affiliation_url}}"
+date: "`r Sys.Date()`"
+output: distill::distill_article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# Learn more about creating websites with Distill at:
+# https://rstudio.github.io/distill/website.html
+
+```
+
+Welcome to the "{{cookiecutter.project_slug}}"
