@@ -9,14 +9,14 @@ knitr::opts_chunk$set(echo = FALSE)
 
 This repo provides a cookiecutter for the purpose of writing a manuscript that is largely driven by computational analyses. In addition, this cookiecutter provides a means to create websites for both the analysis side and the end manuscript based on the [Distill publication](https://distill.pub) web-format, a template that is optimized for scientific and technical communication.
 
----
+
 ## Requirements
 
 First, install `cookiecutter` via `pip install cookiecutter` or `brew install cookiecutter`.
 
 Next, run the code below to create a new directory based on the cookiecutter herein. The new directory will be customized based on how you answer an interactive series of questions.
 
-```
+```sh
 cookiecutter gh:robertamezquita/cookiecutter-manuscript-rlang
 ```
 
@@ -34,7 +34,7 @@ The `_analysis` and `_manuscript` branches are organized in such a way to facili
 
 To generate the template website to see for yourself, run:
 
-```
+```sh
 # `make all` runs `_make-site.sh under the hood to create an
 # intermediate _build folder that is then rendered to _site
 cd _analysis

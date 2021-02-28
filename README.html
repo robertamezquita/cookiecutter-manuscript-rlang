@@ -27,97 +27,45 @@ body {
 
 <h1 id="cookiecutter-for-data-science-driven-manuscript-writing">Cookiecutter for Data Science Driven Manuscript Writing</h1>
 <p>This repo provides a cookiecutter for the purpose of writing a manuscript that is largely driven by computational analyses. In addition, this cookiecutter provides a means to create websites for both the analysis side and the end manuscript based on the <a href="https://distill.pub">Distill publication</a> web-format, a template that is optimized for scientific and technical communication.</p>
-<table>
-<tbody>
-<tr class="odd">
-<td>## Requirements</td>
-</tr>
-<tr class="even">
-<td>First, install <code>cookiecutter</code> via <code>pip install cookiecutter</code> or <code>brew install cookiecutter</code>.</td>
-</tr>
-<tr class="odd">
-<td>Next, run the code below to create a new directory based on the cookiecutter herein. The new directory will be customized based on how you answer an interactive series of questions.</td>
-</tr>
-<tr class="even">
-<td><code>cookiecutter gh:robertamezquita/cookiecutter-manuscript-rlang</code></td>
-</tr>
-<tr class="odd">
-<td>And that’s it! Your new repo is ready to roll.</td>
-</tr>
-<tr class="even">
-<td>## Usage</td>
-</tr>
-<tr class="odd">
-<td>This site has three primary branches:</td>
-</tr>
-<tr class="even">
-<td>* <code>_analysis</code> : the data science side of the project where analyses will be split across notebooks and preliminary figures/tables will be generated * <code>_manuscript</code> : the manuscript side where you’ll compose both the primary text and final versions of figures/tables * <code>_submissions</code> : artifacts that contain the entirety of what is submitted for publication</td>
-</tr>
-<tr class="odd">
-<td>The <code>_analysis</code> and <code>_manuscript</code> branches are organized in such a way to facilitate the creation of a website for each aspect of the project.</td>
-</tr>
-<tr class="even">
-<td>To generate the template website to see for yourself, run:</td>
-</tr>
-<tr class="odd">
-<td><code># `make all` runs `_make-site.sh under the hood to create an # intermediate _build folder that is then rendered to _site cd _analysis make all cd ../_manuscript make all</code></td>
-</tr>
-<tr class="even">
-<td>Navigating to the respective <code>_site</code> directories will bring you to each freshly generated website. Both of these websites are generated based on a configuration file <code>_site.yml</code> and the <code>_make-site.sh</code> script that runs under-the-hood of the <code>make</code> command, which can be modified as needed to reflect what should be available and where as content on the website.</td>
-</tr>
-<tr class="odd">
-<td>### What files are built/rendered for the website?</td>
-</tr>
-<tr class="even">
-<td>Its important to note that the site is rendered <em>only based on what is provided inside of the <code>_build/</code> directory</em>. This is controlled by the build portion of the <code>_make-site.sh</code> script. The <code>_site.yml</code> file then controls what files from the <code>_build</code> directory are included or excluded from the final <code>_site</code> directory. Thus, ensuring that these two files - <code>_make-site.sh</code> and <code>_site.yml</code> - reflect your desired settings is crucial.</td>
-</tr>
-<tr class="odd">
-<td>These two files can (and should!) be modified to copy only the content necessary to build and render the site. The analysis and manuscript sides each have their own defaults explained below.</td>
-</tr>
-<tr class="even">
-<td>### Customizing the website</td>
-</tr>
-<tr class="odd">
-<td>In both the analysis and manuscript sides, the <code>_site.yml</code> controls how the website is structured via the navigation specification. <em>However, this is <strong>not</strong> synonymous with what is built/rendered</em>. Aspects that are built/rendered will not be included in the site if they are not called from within the <code>_site.yml</code> file.</td>
-</tr>
-<tr class="even">
-<td>### Building the analysis website</td>
-</tr>
-<tr class="odd">
-<td>The <code>_analysis</code> side’s website by default is rendered based on only on the content within <code>_notebooks</code>. The reason for this design choice is that the <code>_eda</code> section of the <code>_analysis</code> side should be treated as “the playground” where you can do whatever you like. Eventually however, you’ll hit upon some results that should be formalized and communicated to an audience. This is the time when you “promote” an analysis to a notebook, which will be clearly laid out and ensured to be runnable/reproducible.</td>
-</tr>
-<tr class="even">
-<td>Note that when rendering, it will run a fresh R instance and walk through the notebooks in sequential order to render each <code>.Rmd</code> (<em>be sure to name each <code>.Rmd</code> uniquely and with prefixes that correctly denote the order of operations!</em>).</td>
-</tr>
-<tr class="odd">
-<td>The script however by default ignores any file with <code>_deprecated</code> as part of its path (e.g. inside such a directory). Thus, once a notebook has become irrelevant, place it into the <code>_deprecated</code> directory to keep it as an archival record but not continue building/rendering it as the site gets made.</td>
-</tr>
-<tr class="even">
-<td>Finally, the entire build process - create <code>_build</code>, render <code>_site</code>, destroy <code>_build</code> - can be done via <code>make all</code>. The <code>make build</code>, <code>make render</code>, and <code>make clean</code> (destroys both <code>_build</code> and <code>_site</code>) subcommands discretizes the various steps.</td>
-</tr>
-<tr class="odd">
-<td>#### Bypassing expensive calculations</td>
-</tr>
-<tr class="even">
-<td>Depending on the analysis, this may take a while, and may necessitate intermediate caching or creation of intermediate files that can be reloaded when rendering the <code>.Rmd</code> to avoid costly calculations. Note however that if a cache is created via the default <code>knitr</code> methodology, this cache will be erased each time the website is built, as the cache is placed inside of the <code>_build</code> directory (which is continually regenerated each time). Thus, change the cache location by modifying the <code>knitr</code> settings. Another strategy is to generate intermediate <code>.rda</code>/<code>.rds</code> files that capture expensive calculations, and then set <code>eval=FALSE</code> for the chunks that should only be regenerated manually. However, this strategy has its own weakness in that it breaks the ability to reliably reproduce the workflow.</td>
-</tr>
-<tr class="odd">
-<td>### Building the manuscript site</td>
-</tr>
-<tr class="even">
-<td>The <code>_manuscript</code> side’s website can be a bit more free-form, as it is rendered based on all the <code>.Rmd</code> content within the section folders as all of them are copied into the <code>_build</code> folder. <em>This is because the manuscript side should really only contain prose</em>. This makes it easy and quick to render the website. The <code>.Rmd</code> files should reference objects in the <code>_figures</code>, <code>_tables</code>, and <code>_resources</code> directories as needed for necessary content.</td>
-</tr>
-<tr class="odd">
-<td>#### Building the final manuscript</td>
-</tr>
-<tr class="even">
-<td>Of course, while the website is a great add-on, there still is the matter of generating the <em>final</em> manuscript, which is the composite of all the individual sections of the paper. An initial take of this can be done by running <code>make preview</code>. This will create a preview of the final composition, which is great because it will automagically generate all the necessary citations and bibliography.</td>
-</tr>
-<tr class="odd">
-<td>Inevitably however there may still be work required to finalize the manuscript into a submission ready artifact. Thus, once such is done, the final manuscript artifact can be placed into the <code>_submission</code> directory.</td>
-</tr>
-</tbody>
-</table>
+<h2 id="requirements">Requirements</h2>
+<p>First, install <code>cookiecutter</code> via <code>pip install cookiecutter</code> or <code>brew install cookiecutter</code>.</p>
+<p>Next, run the code below to create a new directory based on the cookiecutter herein. The new directory will be customized based on how you answer an interactive series of questions.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">cookiecutter</span> gh:robertamezquita/cookiecutter-manuscript-rlang</span></code></pre></div>
+<p>And that’s it! Your new repo is ready to roll.</p>
+<h2 id="usage">Usage</h2>
+<p>This site has three primary branches:</p>
+<ul>
+<li><code>_analysis</code> : the data science side of the project where analyses will be split across notebooks and preliminary figures/tables will be generated</li>
+<li><code>_manuscript</code> : the manuscript side where you’ll compose both the primary text and final versions of figures/tables</li>
+<li><code>_submissions</code> : artifacts that contain the entirety of what is submitted for publication</li>
+</ul>
+<p>The <code>_analysis</code> and <code>_manuscript</code> branches are organized in such a way to facilitate the creation of a website for each aspect of the project.</p>
+<p>To generate the template website to see for yourself, run:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># `make all` runs `_make-site.sh under the hood to create an</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># intermediate _build folder that is then rendered to _site</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> _analysis</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> all </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ../_manuscript</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> all</span></code></pre></div>
+<p>Navigating to the respective <code>_site</code> directories will bring you to each freshly generated website. Both of these websites are generated based on a configuration file <code>_site.yml</code> and the <code>_make-site.sh</code> script that runs under-the-hood of the <code>make</code> command, which can be modified as needed to reflect what should be available and where as content on the website.</p>
+<h3 id="what-files-are-builtrendered-for-the-website">What files are built/rendered for the website?</h3>
+<p>Its important to note that the site is rendered <em>only based on what is provided inside of the <code>_build/</code> directory</em>. This is controlled by the build portion of the <code>_make-site.sh</code> script. The <code>_site.yml</code> file then controls what files from the <code>_build</code> directory are included or excluded from the final <code>_site</code> directory. Thus, ensuring that these two files - <code>_make-site.sh</code> and <code>_site.yml</code> - reflect your desired settings is crucial.</p>
+<p>These two files can (and should!) be modified to copy only the content necessary to build and render the site. The analysis and manuscript sides each have their own defaults explained below.</p>
+<h3 id="customizing-the-website">Customizing the website</h3>
+<p>In both the analysis and manuscript sides, the <code>_site.yml</code> controls how the website is structured via the navigation specification. <em>However, this is <strong>not</strong> synonymous with what is built/rendered</em>. Aspects that are built/rendered will not be included in the site if they are not called from within the <code>_site.yml</code> file.</p>
+<h3 id="building-the-analysis-website">Building the analysis website</h3>
+<p>The <code>_analysis</code> side’s website by default is rendered based on only on the content within <code>_notebooks</code>. The reason for this design choice is that the <code>_eda</code> section of the <code>_analysis</code> side should be treated as “the playground” where you can do whatever you like. Eventually however, you’ll hit upon some results that should be formalized and communicated to an audience. This is the time when you “promote” an analysis to a notebook, which will be clearly laid out and ensured to be runnable/reproducible.</p>
+<p>Note that when rendering, it will run a fresh R instance and walk through the notebooks in sequential order to render each <code>.Rmd</code> (<em>be sure to name each <code>.Rmd</code> uniquely and with prefixes that correctly denote the order of operations!</em>).</p>
+<p>The script however by default ignores any file with <code>_deprecated</code> as part of its path (e.g. inside such a directory). Thus, once a notebook has become irrelevant, place it into the <code>_deprecated</code> directory to keep it as an archival record but not continue building/rendering it as the site gets made.</p>
+<p>Finally, the entire build process - create <code>_build</code>, render <code>_site</code>, destroy <code>_build</code> - can be done via <code>make all</code>. The <code>make build</code>, <code>make render</code>, and <code>make clean</code> (destroys both <code>_build</code> and <code>_site</code>) subcommands discretizes the various steps.</p>
+<h4 id="bypassing-expensive-calculations">Bypassing expensive calculations</h4>
+<p>Depending on the analysis, this may take a while, and may necessitate intermediate caching or creation of intermediate files that can be reloaded when rendering the <code>.Rmd</code> to avoid costly calculations. Note however that if a cache is created via the default <code>knitr</code> methodology, this cache will be erased each time the website is built, as the cache is placed inside of the <code>_build</code> directory (which is continually regenerated each time). Thus, change the cache location by modifying the <code>knitr</code> settings. Another strategy is to generate intermediate <code>.rda</code>/<code>.rds</code> files that capture expensive calculations, and then set <code>eval=FALSE</code> for the chunks that should only be regenerated manually. However, this strategy has its own weakness in that it breaks the ability to reliably reproduce the workflow.</p>
+<h3 id="building-the-manuscript-site">Building the manuscript site</h3>
+<p>The <code>_manuscript</code> side’s website can be a bit more free-form, as it is rendered based on all the <code>.Rmd</code> content within the section folders as all of them are copied into the <code>_build</code> folder. <em>This is because the manuscript side should really only contain prose</em>. This makes it easy and quick to render the website. The <code>.Rmd</code> files should reference objects in the <code>_figures</code>, <code>_tables</code>, and <code>_resources</code> directories as needed for necessary content.</p>
+<h4 id="building-the-final-manuscript">Building the final manuscript</h4>
+<p>Of course, while the website is a great add-on, there still is the matter of generating the <em>final</em> manuscript, which is the composite of all the individual sections of the paper. An initial take of this can be done by running <code>make preview</code>. This will create a preview of the final composition, which is great because it will automagically generate all the necessary citations and bibliography.</p>
+<p>Inevitably however there may still be work required to finalize the manuscript into a submission ready artifact. Thus, once such is done, the final manuscript artifact can be placed into the <code>_submission</code> directory.</p>
+<hr />
 <h2 id="structure--rationale">Structure &amp; Rationale</h2>
 <h3 id="rationale">Rationale</h3>
 <p>Manuscripts are finicky things, in that there are myriad complications. Indeed, there is an art to putting together a manuscript, as it involves the management of various moving parts - primary text, figures, tables, and any other supplementary material. Dealing with all this as a single person is difficult enough as it is, and once other people are introduced, it becomes an exponential mess.</p>
