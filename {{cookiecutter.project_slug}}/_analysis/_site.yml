@@ -4,7 +4,7 @@ description: |
   "{{cookiecutter.project_desc}}"
 
 # ---
-include: ["_resources", "_figures", "_tables"]
+include: ["_store-data", "_store-figures", "_store-resources"] # can remove folders not used in build if desired
 exclude: ["*.afdesign", "*.afpub", "*.ai"]
 output_dir: "../_site" # assumes site is rendered inside _build dir
 navbar:
