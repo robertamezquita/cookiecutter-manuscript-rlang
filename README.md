@@ -74,9 +74,9 @@ sides each have their own defaults explained below.
 
 In both the analysis and manuscript sides, the `_site.yml` controls how
 the website is structured via the navigation specification. *However,
-this is **not** synonymous with what is built/rendered*. Aspects that
-are built/rendered will not be included in the site if they are not
-called from within the `_site.yml` file.
+this is not synonymous with what is built/rendered*. Aspects that are
+built/rendered will not be included in the site if they are not called
+from within the `_site.yml` file.
 
 ### Building the analysis website
 
@@ -148,6 +148,11 @@ directory.
 
 ## Structure & Rationale
 
+Herein I’ll detail my own thoughts on what all the point of this is, the
+high-level view of the organizational hierarchy of the repo along with
+their purpose, and finally a tidbit about managing the web of
+interdependencies that inevitably composes such a project.
+
 ### Rationale
 
 Manuscripts are finicky things, in that there are myriad complications.
@@ -207,76 +212,75 @@ the written word. More broadly however, it is focused on the
 navigable file hierarchy, and ensuring *functionality* by implicitly
 supporting workflow-infrastructure tooling.
 
-### Overview
+### High-level view with descriptions
 
 Starting with the total structure, and descriptions for each component
 describing its intended use.
 
--   \*\*\_manuscript\*\*
-    -   \*\_resources\* - miscellaneous objects that may be useful to
-        have handy - either for rendering the website or as a
-        supplementary resource (code will be kept in a different part of
-        the repo so don’t place that here)
-    -   \*\_figures\* - bespoke assets and vector/photo/publisher
-        specific software format files
-    -   \*\_tables\*
-        -   \*\_main\* - these tables should be in a common format (tsv;
+-   \_manuscript
+    -   \_resources - miscellaneous objects that may be useful to have
+        handy - either for rendering the website or as a supplementary
+        resource (code will be kept in a different part of the repo so
+        don’t place that here)
+    -   \_figures - bespoke assets and vector/photo/publisher specific
+        software format files
+    -   \_tables
+        -   \_main - these tables should be in a common format (tsv;
             csv); while stylized tables can be kept here as well, common
             format tables that can be interpreted programmatically will
             be nice to have for the website rendering
-        -   \*\_supplementary\* - any tables that should be a part of a
+        -   \_supplementary - any tables that should be a part of a
             manuscript submission
-    -   *index.Rmd*, *about.Rmd*, *footer.html* - the index page is the
-        start point of the manuscript website; the about shows an
-        example page; the footer is a nice to have across the website
-    -   \*\_site.yml\* - the structure definition that composes the site
-    -   *Makefile*, \*\_build-site.sh*, *\_render-site.sh\* - helpers
-        that automagically build the site; `make build` creates the
-        website skeleton and performs necessary setup such as copying
-        the \*\_figures*, *\_tables*, *\_resources\* folders and other
+    -   index.Rmd, about.Rmd, footer.html - the index page is the start
+        point of the manuscript website; the about shows an example
+        page; the footer is a nice to have across the website
+    -   \_site.yml - the structure definition that composes the site
+    -   Makefile, \_build-site.sh\*, \_render-site.sh - helpers that
+        automagically build the site; `make build` creates the website
+        skeleton and performs necessary setup such as copying the
+        \_figures\*, \_tables\*, \_resources\* folders and other
         top-level assets (your Rmd’s!) into the automagically created
         `_build` folder; `make render` actually produces the site and
         places it in `_site`; `make clean` will remove the `_build`
         folder; `make all` runs all these steps
-    -   * &lt; *m**a**n**u**s**c**r**i**p**t*.*R**m**d**f**i**l**e**s*&gt;* -
-        these `RMarkdown` files are the content of your manuscript’s
-        site and also knitted together to form the full body of the
-        manuscript; it can be organized into as many or as few files as
-        you’d like, where each file becomes its own separate page; note,
-        ideally, these *do not* have code in them; if they do, ensure it
-        is a necessity (e.g. for pulling in a table)
-    -   *your-bespoke-manuscript.whatever* - the manually compiled
+    -   manuscript .Rmds - these `RMarkdown` files are the content of
+        your manuscript’s site and also knitted together to form the
+        full body of the manuscript; it can be organized into as many or
+        as few files as you’d like, where each file becomes its own
+        separate page; note, ideally, these *do not* have code in them;
+        if they do, ensure it is a necessity (e.g. for pulling in a
+        table)
+    -   \*your-bespoke-manuscript.whatever - the manually compiled
         version of the manuscript should you so choose to make it (and
         you likely will, as most publishers require `.docx` or `.pdf`
         format)
--   \*\*\_analysis\*\*
-    -   \*\_data-store\* - a central place to store *processed*
-        datasets; this folder may have additional substructure as needed
-        to organize the data in a meaningful way; most importantly, the
+-   \_analysis
+    -   \_data-store - a central place to store *processed* datasets;
+        this folder may have additional substructure as needed to
+        organize the data in a meaningful way; most importantly, the
         files here should be *links*, as they should be tied to specific
         functional *notebooks* that generate them; this area may also
-        contain final outputs generated from data stored in
-        \*\_data-raw\* and created by \*\_data-exec\*, but that is a
-        judgement call for you to make
-    -   \*\_data-raw\* - raw datasets that are (mostly) untouched and
-        may be used to generate object within \*\_data\*; ideally, this
-        area will contain (untracked) large raw data (e.g. bams,
-        reference genomes, etc.) either as-is or via a symbolic link
+        contain final outputs generated from data stored in \_data-raw\*
+        and created by \_data-exec\*, but that is a judgement call for
+        you to make
+    -   \_data-raw - raw datasets that are (mostly) untouched and may be
+        used to generate object within \_data\*; ideally, this area will
+        contain (untracked) large raw data (e.g. bams, reference
+        genomes, etc.) either as-is or via a symbolic link
         representation to a central large data store
-    -   \*\_data-exec\* - executable scripts that can be used to
-        re-generate objects stored in the \*\_data*; these scripts
-        should always be checked that they work; these scripts should
-        really be thought of as being part of central
-        preprocessing/pipeline work that operates on large data stores
-        that would not be kept in a reasonably sized repo; while there
-        may be some overlap conceptually with analysis code stored in
-        *\_notebooks\*, you can think of this area as more for
-        components that do not need much explanation/are not the novel
-        parts of the work
-    -   \*\_eda\* - exploratory data analyses that may or may not work
-        at any given time; this area can be organized in a manner that
-        best suits your needs
-    -   \*\_notebooks\* - a place to store *working*, functional code
+    -   \_data-exec - executable scripts that can be used to re-generate
+        objects stored in the \_data\*; these scripts should always be
+        checked that they work; these scripts should really be thought
+        of as being part of central preprocessing/pipeline work that
+        operates on large data stores that would not be kept in a
+        reasonably sized repo; while there may be some overlap
+        conceptually with analysis code stored in \_notebooks\*, you can
+        think of this area as more for components that do not need much
+        explanation/are not the novel parts of the work
+    -   \_eda - exploratory data analyses that may or may not work at
+        any given time; this area can be organized in a manner that best
+        suits your needs
+    -   \_notebooks - a place to store *working*, functional code
         (e.g. EDA code that has been “promoted”) that is mixed with
         prose to explain the work that generates either data objects,
         tables, or figures; this store is organized into groups that are
@@ -284,7 +288,7 @@ describing its intended use.
         there may be notebooks with upstream dependencies); within each
         notebook, the same approach is taken, as (long) scripts are
         broken up into a sequential order for execution
-        -   *01.my-first-analysis-objective* - each notebook should be
+        -   \*01.my-first-analysis-objective - each notebook should be
             centered on a single analytical objective; inside are all
             the inputs and outputs for the analysis such that each
             notebook can be a standalone component
@@ -292,40 +296,39 @@ describing its intended use.
             -   *02.more-preamble.Rmd*
             -   *…*
             -   *0N.figure-generating-code.Rmd*
-            -   \*\_figures\* - output figures generated within the
-                notebook
-            -   \*\_tables\* - output tables generated within the
-                notebook
-            -   \*\_input\* - input data used by the notebook; may be a
+            -   \_figures - output figures generated within the notebook
+            -   \_tables - output tables generated within the notebook
+            -   \_input - input data used by the notebook; may be a
                 combination of *de-novo* external data, data from
                 *data-raw*
-            -   \*\_output\* - output data generated within the
-                notebook; these data are linked *out* to other areas of
-                the repo (e.g., downstream notebooks)
-        -   *02.my-second-analysis-objective* - note the sequential
+            -   \_output - output data generated within the notebook;
+                these data are linked *out* to other areas of the repo
+                (e.g., downstream notebooks)
+        -   \*02.my-second-analysis-objective - note the sequential
             order in relation to the first notebook denoted by the
             naming schema
             -   *01.code.Rmd*
             -   *…*
-            -   \*\_figures\*
-            -   \*\_tables\*
-            -   \*\_data-input\* - if this notebook is dependent on data
+            -   \_figures\*
+            -   \_tables\*
+            -   \_data-input - if this notebook is dependent on data
                 outputs generated by a prior notebook, this will have a
-                *link* to relevent notebook’s \*\_data-output\*
+                *link* to relevent notebook’s \_data-output\*
                 directory’s file
-            -   \*\_data-output\*
-    -   \*\_figures-store\* - a central location for figures, with links
-        to the pertinent figure generated within a notebook
-    -   \*\_tables-store\* - likewise for tables
-    -   \*\_resources-store\* - likewise for any other resources
--   \*\*\_submissions\*\* - the complete artifacts (code, figures, text,
-    etc.) that are actually submitted to a publisher; note the use of
-    the plural form..
+            -   \_data-output\*
+    -   \_figures-store - a central location for figures, with links to
+        the pertinent figure generated within a notebook
+    -   \_tables-store - likewise for tables
+    -   \_resources-store - likewise for any other resources
+-   \_submissions - the complete artifacts (code, figures, text, etc.)
+    that are actually submitted to a publisher; note the use of the
+    plural form..
 
-### How these links are managed
+### Managing the various interdependencies
 
 As noted above, the relationships between inputs, scripts, and outputs
-ends up forming a directed acyclic graph (DAG). The construction of this
+end up forming a directed acyclic graph (DAG) that quickly gets out of
+hand as a project’s scope inevitably increases. The construction of this
 DAG is guided by this cookiecutter repository. The simplest form of
 managing/creating this DAG would simply be to create symbolic links
 between the relevant objects. However, modern infrastructure focused
@@ -357,4 +360,5 @@ This project is licensed under the terms of the [MIT License](/LICENSE)
 
 Much of this template is based on lazappi’s
 [cookiecutter-r-data-analysis](https://github.com/lazappi/cookiecutter-r-analysis)
-template.
+template, which was based on other templates and the tree goes on and
+on.
