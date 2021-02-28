@@ -8,21 +8,20 @@
 MODE=$1
 
 if [[ $MODE == "build" ]]; then
-    RMDS=$(find . -name "*Rmd" -depth 2 | grep -v '_site' | grep -v '_build' )
-
     # Make a _build directory where everything is flattened (all Rmds at same level)
     mkdir -p _build/
 
-    # - extra resources
-    cp -R _images _build/
+    # Copy over the folder structures
+    cp -R _figures _build/
+    cp -R _tables _build/
     cp -R _resources _build/
-
+    
     # - top-level html/settings
     cp _site.yml _build/
     cp _footer.html _build/
 
-    # - copy Rmds
-    cp *.Rmd _build/
+    # - copy all Rmds, regardless of depth, place into top-level of _build/
+    RMDS=$(find . -name "*Rmd" | grep -v '_site' | grep -v '_build' )
     for RMD in ${RMDS[*]}; do
         cp $RMD _build/
     done

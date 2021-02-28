@@ -9,7 +9,7 @@ exclude: ["*.afdesign", "*.afpub", "*.ai"]
 output_dir: "../_site" # assumes site is rendered inside _build dir
 navbar:
   logo:
-    image: _figures/_assets/logo.png
+    image: _store-resources/_assets/logo.png
   search: true
   right:
     - text: "Home"
@@ -23,7 +23,7 @@ navbar:
           href: 01-01_first-step.html
         - text: "Step2"
           href: 01-02_second-step.html
-        - text: "Section 2"
+        - text: "Objective 2"
         - text: "Step1"
           href: 02-01_first-step.html
         - text: "Step2"

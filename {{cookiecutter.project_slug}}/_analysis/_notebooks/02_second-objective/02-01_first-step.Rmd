@@ -3,10 +3,10 @@ title: "First step"
 description: |
   "Step 1 of notebook 2."
 author:
-  - name: "{{cookiecutter.full_name}}",
-    orcid_id: "{{cookiecutter.orcid_id}}",
-    url: "{{cookiecutter.personal_url}}",
-    affiliation: "{{cookiecutter.affiliation}}",
+  - name: "{{cookiecutter.full_name}}"
+    orcid_id: "{{cookiecutter.orcid_id}}"
+    url: "{{cookiecutter.personal_url}}"
+    affiliation: "{{cookiecutter.affiliation}}"
     affiliation_url: "{{cookiecutter.affiliation_url}}"
 date: "`r Sys.Date()`"
 output: distill::distill_article
