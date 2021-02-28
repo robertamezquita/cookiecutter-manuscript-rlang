@@ -10,7 +10,7 @@
     "project_name": "Project name",
     "project_slug": "{{cookiecutter.project_name.lower().replace(' ', '-')}}",
     "project_desc": "Project description",
-    "project_url": "Project url",
+    "project_url": "https://www.project.com",
     "site_footer": "Created {% now 'local' %}.",
     "git_remote": "Git remote (if known)",
     "start_date": "{% now 'local' %}",

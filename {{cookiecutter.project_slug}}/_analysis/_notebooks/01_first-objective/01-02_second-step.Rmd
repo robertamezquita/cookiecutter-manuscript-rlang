@@ -5,8 +5,8 @@ description: |
 author:
   - name: "{{cookiecutter.full_name}}",
     orcid_id: "{{cookiecutter.orcid_id}}",
-    url: "{{cookiecutter.personal_url}}"
-    affiliation: "{{cookiecutter.affiliation}}"
+    url: "{{cookiecutter.personal_url}}",
+    affiliation: "{{cookiecutter.affiliation}}",
     affiliation_url: "{{cookiecutter.affiliation_url}}"
 date: "`r Sys.Date()`"
 output: distill::distill_article

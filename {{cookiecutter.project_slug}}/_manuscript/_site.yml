@@ -24,7 +24,7 @@ navbar:
         - text: "Section 2"
         - text: "Article 1"
           href: 02-01_article.html
-    - icon: fab fa-gitlab
+    - icon: fab fa-github
       href: "{{cookiecutter.project_url}}"
 
 # ---

@@ -18,13 +18,17 @@ navbar:
       href: about.html
     - text: "Articles"
       menu:
-        - text: "Section 1"
-        - text: "Article 1"
-          href: 01-01_article.html
+        - text: "Objective 1"
+        - text: "Step1"
+          href: 01-01_first-step.html
+        - text: "Step2"
+          href: 01-02_second-step.html
         - text: "Section 2"
-        - text: "Article 1"
-          href: 02-01_article.html
-    - icon: fab fa-gitlab
+        - text: "Step1"
+          href: 02-01_first-step.html
+        - text: "Step2"
+          href: 02-02_second-step.html
+    - icon: fab fa-github
       href: "{{cookiecutter.project_url}}"
 
 # ---
