@@ -1,7 +1,5 @@
 Cookiecutter for Data Science Driven Manuscript Writing
 ================
-true
-2021-02-27
 
 ## Rationale
 

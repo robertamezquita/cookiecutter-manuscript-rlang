@@ -1,11 +1,5 @@
 ---
 title: "Cookiecutter for Data Science Driven Manuscript Writing"
-description: |
-  This document explains the organizing philosophy behind this style of organization.
-author:
-  - name: Robert A. Amezquita, PhD
-    orcid_id: 0000-0001-6868-7193
-date: "`r Sys.Date()`"
 output: github_document
 ---
 
