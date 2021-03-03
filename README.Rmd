@@ -7,6 +7,8 @@ output: github_document
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+<img src='assets/logo.png' align="right" height="139" /></a>
+
 This repo provides a cookiecutter for the purpose of writing a manuscript that is largely driven by computational analyses. In addition, this cookiecutter provides a means to create websites for both the analysis side and the end manuscript based on the [Distill publication](https://distill.pub) web-format, a template that is optimized for scientific and technical communication.
 
 

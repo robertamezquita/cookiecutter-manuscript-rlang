@@ -1,6 +1,8 @@
 Cookiecutter for Data Science Driven Manuscript Writing
 ================
 
+<img src='assets/logo.png' align="right" height="139" /></a>
+
 This repo provides a cookiecutter for the purpose of writing a
 manuscript that is largely driven by computational analyses. In
 addition, this cookiecutter provides a means to create websites for both
