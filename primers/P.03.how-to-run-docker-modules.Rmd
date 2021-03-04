@@ -1,0 +1,283 @@
+---
+title: "Running Docker Modules"
+description: |
+  Running your own Docker images.
+author:
+  - name: Robert A. Amezquita, PhD
+    orcid_id: 0000-0001-6868-7193
+date: "`r Sys.Date()`"
+output: distill::distill_article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+This primer covers some of the bare-essential concepts that are helpful for running and debugging the modules herein. For more details, please check out the comprehensive online Docker documentation.
+
+---
+
+## Mounting Data
+
+In order to perform computations on files stored on the local system, these files must be mounted to the docker container - similar to how an external drive must first be mounted in order to access its files.
+
+### Mounting shared drives
+
+To mount local directories into the container (such as your input data, a place to save your outputs to local, reference genome, etc.), the `--mount` argument can be provided:
+
+```sh
+docker run --rm -it  \
+    --mount type=bind,source="$(pwd)"/my-input,target=/mnt/input/ \
+    --mount type=bind,source="$(pwd)"/my-output,target=/mnt/output/ \
+    --mount type=bind,source="$(pwd)"/my-local-hg19,target=/mnt/hg19/ \
+    <docker-image-id>
+```
+
+---
+
+## Interactive Docker Image Usage
+
+### Running a Container in the Current Shell
+
+Within the `app/` directory lives various modules, for example, those used for methylomics analysis. Let's start with performing sequence alignment to a reference genome, where we will call upon the `bwameth` module, a special aligner for reduced representation sequencing where methylated C's are protected from conversion to T's.
+
+The relevant image for this module was prebuilt on Skykomish, and named `red-methylation-bwameth`, where RED stands for "research and early development", and methylation refers to the family of modules, and bwameth refers to the specific module.
+
+To see the built module's help page, a helpful `-h` command will bring up more information:
+
+```sh
+docker run --rm -ti \
+  red-methylation-bwameth -h
+```
+
+An example for running this particular module is as follows:
+
+```sh
+ID="NA12878"
+REFDIR="$(pwd)/data/ref/hg19_local/"
+INDIR="$(pwd)/data/interim/fastq/resbio/Samples/$ID"
+OUTDIR="$(pwd)/data/interim/bwa-meth-test/"
+
+CMD="--sid $ID --threads 4 /mnt/hg19/hg19.fa /mnt/input/ /mnt/output/"
+
+docker run --rm -ti \
+  -e USER_UID=$(id -u) -e USER_GID=$(id -g) \
+  --mount type=bind,source=$REFDIR,target=/mnt/hg19/ \
+  --mount type=bind,source=$INDIR,target=/mnt/input/ \
+  --mount type=bind,source=$OUTDIR,target=/mnt/output/ \
+  red-methylation-bwameth \
+  $CMD
+```
+
+As explained in the prior section, the mountpoints specified via `--mount` load up the requisite inputs and connect the outputs to the local filesystem. When writing the command's arguments to be evaluated, here stored in the variable `$CMD`, the arguments must refer to locations in relation to the _docker image_, e.g. the mountpoints, not the local file system.
+
+---
+
+## Running Docker Containers Non-Interactively
+
+To execute a command or script using this docker container, you first need to have the container running in detached mode via the `--detach` flag. The `--name` flag is provided for convenience in referencing the running image.
+
+```sh
+docker run --rm -it  \
+    --detach \
+    --name binf-resdev \
+    $IMAGE
+```
+
+You can view current running background docker instances via:
+
+```sh
+docker ps
+```
+
+Then a command can be executed using this image via:
+
+```sh
+docker exec -ti binf-resdev sh -c "echo hello world > helloworld.txt"
+```
+
+Furthermore, the docker can then be re-entered interactively via executing a new shell, where the `helloworld.txt` file can be seen.
+
+```sh
+docker exec -ti binf-resdev /bin/bash
+```
+
+For more complex scripts:
+
+- A mount can be used to share a script with the docker container, and then run from inside the container via the `docker exec` command as above.
+  - Example: `docker exec -ti $IMAGE ./path/inside-container/mounted-volume/my-script.sh`
+- The `docker cp` command can be used to copy a script that is stored locally into the docker container.
+  - Example: `docker cp $IMAGE:/path/to/local/my-script.sh /path/inside-container/my-script.sh`
+
+Finally, to kill the running docker instance, the `docker kill` command can be used. Note that any changes made to the container are not saved, including written files, unless files were written to drives mounted on your local computer (see above for instructions in how to mount folders):
+
+```sh
+docker kill binf-resdev
+```
+
+---
+
+## WARNING: Ownership/Permission Changes when Mounting
+
+When running a docker image, there are esoteric issues that may arise regarding file ownership and permissions<sup>\*</sup>. For example, if running the image _as is_, any mounted directories that have new files written to them will be owned by the Docker image's default user - `root`. This remains so after spinning down the container, and leaves the files as being owned by `root`. This may not be as much of an issue on a local computer where one has `sudo` access, but could potentially still be problematic.
+
+To prevent any issues from arising, the images in this repository contain a special environment variable that specifies a user/group ID. This is necessary when running these images with mounted directories to avoid any potential ownership/permission issues to your local files. By passing the `USER_UID` and `USER_GID` variables in at runtime, the default user of the container acquires a matching user id and group id as the executor on your local system (you). This makes it such that any files written by the docker container (as well as any folders mounted to the docker container) will have the correct permissions upon closing the docker container (e.g., will still be owned by your user).
+
+To find out your user/group id, use the `id` command (`id -u` and `id -g` for user and group id, respectively).
+
+Note that the environmental variable override flag `-e` specifying `USER_UID` and `USER_GID` should be supplied as one of the first arguments, prior to `--mount` in particular.
+
+Thus, summarizing the above commands, one can run a CLI tool on some data that is mounted to the docker container as follows and avoid any permissions issues:
+
+```sh
+# Acquire user/group id
+UID=$(id -u)
+GID=$(id -g)
+
+# Spin up the container
+docker run --rm -ti \
+  -e USER_UID=$UID -e USER_GID=$GID \
+  --mount type=bind,source="$(pwd)"/my-input,target=/mnt/input/ \
+  --mount type=bind,source="$(pwd)"/my-output,target=/mnt/output/ \
+  --detach \
+  --name my-container \
+  $IMAGE
+
+# Execute some command
+docker exec -ti my-container bash -c "/app/MyTool.sh"
+
+# Spin down image
+docker kill my-container
+```
+
+<sup>\*</sup>Note that this may be an issue just with how these images are setup, and may not be a universal issue with other docker images you use.
+
+---
+
+## Overriding the default entrypoint
+
+The entrypoint specifies what the docker is first tasked with doing upon spinning up. In some cases, this may be as simple as starting an interacting shell via `/bin/bash`. For dockerified-executables that encase a non-interactive routine, the entrypoint starts up a script/computing process and spins down the container once finished, similar to any other CLI tool. To override whatever default entrypoint is specified enter an interactive computing environment, the argument `--entrypoint /bin/bash` can be passed to the `docker run` command.
+
+---
+
+## Running Dockerized Executables with Arguments
+
+Docker-based apps (executables) are command-line executables that present a non-interactive interface (CLI) by which to perform some set of tasks. Naturally, these docker executables must be programmed for a command-line interface and support arguments/flags/options.
+
+An example - say we have some docker app, `say-hello-image`, whose entrypoint is to read the first argument provided, and simply echo the provided string.
+
+```sh
+docker run --rm -ti \
+  say-hello-image "hi world!"
+```
+
+```sh
+$> hi world!
+```
+
+Similarly, we can pass any other arbitrary arguments/flags, similar to any other CLI tool access a docker executable's help page (again, assuming such functionality has been programmed in by the author).
+
+While this is a toy example, but illustrates how to pass various arguments to the CLI following the specification of the image to run as a container.
+
+---
+
+## Code Examples
+
+### Single Jobs
+
+An example for running this particular module is as follows:
+
+```sh
+ID="NA12878"
+REFDIR="$(pwd)/data/ref/hg19_local/"
+INDIR="$(pwd)/data/interim/fastq/resbio/Samples/$ID"
+OUTDIR="$(pwd)/data/interim/bwa-meth-test/"
+
+docker run --rm -ti \
+  -e USER_UID=$(id -u) -e USER_GID=$(id -g) \
+  --mount type=bind,source=$REFDIR,target=/mnt/hg19/ \
+  --mount type=bind,source=$INDIR,target=/mnt/input/ \
+  --mount type=bind,source=$OUTDIR,target=/mnt/output/ \
+  red-methylation-bwameth \
+  --sid $ID --threads 4 /mnt/hg19/hg19.fa /mnt/input/ /mnt/output/
+```
+
+This creates a single active job in the foreground that is watched on the current terminal.
+
+### Background Parallel Jobs
+
+Another common pattern is to iterate over many samples and submit jobs _in parallel_. Note that this may lead to process crashes due to insufficient computational resources.
+
+```sh
+JOB_BASE="ichorcna"
+RESOLULTION="1000kb"
+INDIR_BASE="$(pwd)/data/interim/bwa-meth"
+OUTDIR_BASE="$(pwd)/data/interim/ichorcna"
+REFDIR="$(pwd)/data/ref/hg19_local"
+BIDS=$(ls $INDIR_BASE/ | awk -F'/' '{print $NF}' | awk -F'_' '{print $1}' | uniq | grep "B804078")
+
+PONDIR="$(pwd)/data/interim/ichorcna-pons"
+PON="LPWG-ResBio-NA12878.1000kb.PoN_median.rds"
+
+for I in ${BIDS[*]}; do
+  INDIR=$INDIR_BASE/$I
+  OUTDIR=$OUTDIR_BASE/${I}_vs_$PON
+  mkdir -p $OUTDIR
+  echo $I
+
+  docker run --rm -ti \
+    -e USER_UID=$(id -u) -e USER_GID=$(id -g) \
+    --mount type=bind,source=$REFDIR,target=/mnt/hg19/ \
+    --mount type=bind,source=$PONDIR,target=/mnt/_resources/ \
+    --mount type=bind,source=$INDIR,target=/mnt/input/ \
+    --mount type=bind,source=$OUTDIR,target=/mnt/output/ \
+    --name ${JOB_BASE}_$I \
+    --detach \
+    red-ichorcna -r 1000kb --sid $I -p /mnt/_resources/$PON /mnt/input/${I}.bam /mnt/output/
+done
+```
+
+The key argument here is _--detach_, which pushes the docker container to the background. Active (background and foreground) docker processes can be checked using `docker ps | grep <pattern-of-job>`.
+
+---
+
+## Running Modules Conveniently
+
+To conveniently run executable modules, an alias can be created encompassing the most used arguments for docker.
+
+```sh
+dockernow() {
+  docker run --rm -ti \
+  -e USER_UID=$(id -u) -e USER_GID=$(id -g) \
+  -v $(pwd):/mnt/project/ \
+  $*
+}
+```
+
+In the above, the place where the current directory is mounted within the container can be changed as desired; here it is `/mnt/project/`. Thus, any inputs/outputs must be relative to the current directory within the `/mnt/project/`, e.g. if you have a directory called `my-files` you'd refer to them in your command as `/mnt/project/my-files`.
+
+Thus, the shorthand is now:
+
+```sh
+dockernow <module-name> <module-commands>
+```
+
+To test this, try:
+
+```sh
+dockernow red-bwamem -h
+```
+
+Another fun shorthand is for when you need to check some things within the container. Typically, you would add `--entrypoint /bin/bash`. We can make another alias for this case:
+
+```sh
+dockerlive() {
+  docker run --rm -ti \
+  -e USER_UID=$(id -u) -e USER_GID=$(id -g) \
+  --entrypoint /bin/bash \
+  -v $(pwd):/mnt/project/ \
+  $*
+}
+```
+
+Add these to your startup script (`.bashrc`, `.zshrc`, etc.) to always have this alias available.

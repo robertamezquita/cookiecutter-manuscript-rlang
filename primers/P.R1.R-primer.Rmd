@@ -1,0 +1,12 @@
+---
+title: "Learning & Using R"
+description: |
+  Primers for learning R to facilitate using the `msiverse` R package ecosystem.
+author:
+  - name: Robert A. Amezquita, PhD
+    orcid_id: 0000-0001-6868-7193
+date: "`r Sys.Date()`"
+output: distill::distill_article
+---
+
+Given that the majority of the `msiverse` analytical framework is run through an R-based ecosystem of packages, it naturally is nice to know more about the computing environment that the R language provides. Here I'll point to a previous book section I wrote for a manuscript, ["Orchestrating Single-Cell Analysis with R/Bioconductor"](https://bioconductor.org/books/release/OSCA/index.html). The first section details a nice compendium of resources for learning both basic and advanced usage of R as well as resources for learning how to develop in R. Alongside this, I suggest checking out the site on [learning the tidyverse](https://www.tidyverse.org/learn/) by RStudio.

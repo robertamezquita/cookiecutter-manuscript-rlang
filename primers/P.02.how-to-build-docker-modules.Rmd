@@ -1,0 +1,149 @@
+---
+title: "Building Docker Modules"
+description: |
+  Rolling your own Docker images.
+author:
+  - name: Robert A. Amezquita, PhD
+    orcid_id: 0000-0001-6868-7193
+date: "`r Sys.Date()`"
+output: distill::distill_article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+Below is a basic primer on how to build a Docker image that will become a self-standing executable (module). This is especially pertinent for building the submodules within the `msilauncher` module of `msiverse` to enable essential preprocessing of alignment data for MSI analysis.
+
+
+## Structure of a Docker Image
+
+The essential structure of a full Docker image can be broken down into the follow areas that are stored within a given module's directory.
+
+- _Dockerfile_ - specifies the instructions to build the image; this creates a reproducible environment that ensures a container will be runnable on a variety of architectures (systems), maximizing reproducibility with minimal hassle and overhead.
+  - The build instructions are similar in essence to what you would first run when setting up a new computer: programs to install, specifying the filesystem organization and any new directories, resources to download from the internet, etc.
+  - Files may be co-located with the `Dockerfile` and loaded upon building the image, ensuring a reproducible/traceable store of resources
+- _entrypoint.sh_ - once the Docker image is loaded and a container created, this is the first thing it runs, and thus specifies how the image works
+  - The entrypoint may simply be an instruction to enter an interactive shell (e.g. `/bin/bash`, where the local system is the docker container)
+  - A non-interactive routine that runs internal scripts/programs, which may even take additional options, flags, and arguments if such functionality is authored in
+
+These two files form the absolute basis of the most simple of docker images. Anything else is optional and only included if necessary to the Docker container's usage.
+
+### What about other frameworks for structuring Docker images?
+
+There are definitely other ways to structure a Dockerfile, but by and large the concepts will remain the same across all these different takes on how to best structure your module.
+
+
+
+## Dockerfiles - how they work and our template
+
+The `Dockerfiles` folder contains a basic template for what a `Dockerfile` should look like for building an image.
+
+To build a Docker image, and subsequently run it for testing purposes, instructions are included at the top of the template `Dockerfile`, shown below for brevity:
+
+```sh
+# To build the image:
+    docker build -f Dockerfile -t $IMAGE_NAME .
+
+# To run this image:
+    docker run --rm -ti \
+        -e USER_UID=$(id -u) -e USER_GID=$(id -g) \
+       --mount type=bind,source=/my/local/input,target=/mnt/input/ \
+        --mount type=bind,source=/my/local/output,target=/mnt/output/ \
+        $IMAGE_NAME <args-to-cmd>
+```
+
+### Is this optimized?
+
+No, there are plenty of areas for optimization, including using common build layers across images to reduce diskspace overhead, as well as how to manage system dependencies and their installation. In no way are these `Dockerfile` templates "the best", future work should be targeted at optimizing the image construction after the modules are stabilized, as some of the practices are aimed at speeding up testing and iteration (see next section).
+
+### Tips for the Testing & Build Cycle of Docker images
+
+As one develops a Docker executable (module), likely there will be a need for rapid iteration through sequential testing and building rounds. The Docker build mechanism caches all steps that are _unchanged_. Therefore, it may be preferable to place parts of the Dockerfile that will be undergoing development towards the end of the file.
+
+In particular, the driving script that runs the actual executable, in this case `/app/<module>.sh`, should be placed at the very end, as copying in a new version of the script is extremely fast. Conversely, changing the system dependencies block at the top by adding/subtracting packages will result in the entire build process starting up again from (practically) scratch.
+
+### Primary Actions within a Dockerfile
+
+The primary commands within a Dockerfile for the build process are:
+
+- `ENV` - assigns an environmental variable for use within the Dockerfile build context; is not exported into the runtime container environment
+- `COPY` - copies any files from the current environment into the image that are then accessible anytime the Docker container is realized from the image
+- `RUN` - runs some shell command
+- `VOLUME` - specifies new volumes to be created
+- `ENTRYPOINT` - the final command that will point to what is executed first upon spinning up a new Docker container; once the container is started up, this is what will immediately be run; here it is set to `/app/entrypoint.sh`
+
+### Sections of the Dockerfile
+
+Below are the key sections of note where new modules will need to be modified, as well as sections that should be kept as standard.
+
+#### Title and Description Comment Block
+
+This section should have a title line and brief description of what the module does. A longer exposition can be provided in an accompanying `README.md` if desired.
+
+#### Base OS and Setup
+
+The line `FROM ubuntu:bionic-20200311 as build` specifies the OS to be used as the foundational structure. Notably, two different builds are provided here in the templates directory - an `ubuntu-bionic` and `rocker` template. The `rocker` build is one that supports the R language out of the box.
+
+The most important part here is that the environment variable within the Dockerfile for the working directory `WORKDIR` is set to `/app/`. This is where I've designed the app to run out of, and the location for the helper functions, resource files, etc. to be copied into the Docker container.
+
+#### Install Dependencies
+
+The bread and butter of why Docker even exists. Here is where you will install the base packages necessary for running the executable. In the template are a variety of baseline useful libraries and tools, but these can/should be changed to the absolute minimum required.
+
+Ideally, the Docker build will not try to access external resources that are prone to changing. However, if this is done, then that's what CI/CD is for to ensure that the build works on the latest and greatest versions of software.
+
+#### OS Setup
+
+This section is of debateable necessity, but it does address the issue of running Docker as root and it destroying all your access to files that are mounted as they become owned by `root`.
+
+Note that in the `docker run` step, you will thus need to be sure to provide the environmental variables via `-e USER_UID=$(id -u) -e USER_GID=$(id -g)` to provide your own numeric user/group IDs so that all mounted files are still owned by you once you are done using the Docker container.
+
+#### Create Standard Volumes
+
+The container is allocated specific volumes that correspond to a specific function that should be fairly straightforward - `/mnt/input` for inputs, `/mnt/output` for outputs, `/mnt/resources` for any provided supplementary files, etc.
+
+#### Final Actions
+
+This copies over the scripts that will perform the module's duties, including the self-titled script, `<module>.sh`, the `entrypoint.sh` file that will be the first command and kick-off the `<module>.sh` script, and finally that gives permission for the user to run the script once the Docker container is spun up.
+
+
+
+## Building & Maintaining a Module
+
+Now that you know how a Docker module is set up - maybe you've played around with the template or made your own from scratch - the next step is building it.
+
+Modules must first be built using a docker client on your compute system. To get started quickly, run `make build-images`, which will iterate through the `app/` directory and build all modules therein. To build a specific module, navigate to the module of interest and run:
+
+```sh
+cd app/<module-id>
+docker build -f Dockerfile -t red-<module-id> .
+```
+
+Note that the `-t` flag is the image tag, e.g. the docker image's id, which is used to refer to the image for usage. The `-f` argument specifies the path to the Dockerfile containing the build instructions. The `.` at the end points to the directory within which the build process occurs - in this case the `.` refers to the current working directory.
+
+### Updating the Module to the Latest Development Version
+
+To get the most recent version of the module, first perform a `git pull` to update this repository, and then run the build instructions above.
+
+### Updating the Module from an External Source
+
+To pull the latest available image, the `docker pull` command will point to the URL of the artifactory for ResBio, where stable dev images are hosted.
+
+```sh
+docker pull artifactory.resbio.io/docker-staging/bioinformatics-docker-resdev:latest-dev
+```
+
+### Accessing Built Modules
+
+All prebuilt module images in this repo are tagged with the prefix `red-`. Available modules on your system can be seen by running:
+
+```
+docker images | grep "red-"
+```
+
+This will bring up all docker images with the prefix `red-`. The naming convention for each module is `red-<module name>`, where `<module name>` refers to a subfolder within the `/app/` directory. Of course, any pattern will do for use with your own naming schema.
+
+## Using the Provided Template to Write Modules
+
+The templates provided in `templates/` in this repo have some specific structural and compositional aspects to be aware of. For more info, read the on for how to create docker modules. Another strategy is to use an existing module as the backbone for a new one (which will likely produce similar results in a more immediate fashion for those with previous experience).

@@ -1,0 +1,38 @@
+---
+title: "Overview of Docker"
+description: |
+  Understanding key concepts about Docker.
+author:
+  - name: Robert A. Amezquita, PhD
+    orcid_id: 0000-0001-6868-7193
+date: "`r Sys.Date()`"
+output: distill::distill_article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+This very quick primer gives some definitions and a very quick overview of the concepts of using Docker.
+
+---
+
+## Why is a tool like Docker important?
+
+While utilities can be installed in an ad-hoc way on a system environment, there are times when the module needs to be run in a different place, such as within an AWS-run pipeline. Building a Docker image that houses the executable unit will allow for maximum portability and reproducibility. Furthermore, as the software landscape continually evolves, this modularization approach enhances continuous integration & deployment (CI/CD), allowing for keeping software up-to-date and functional as external dependencies change and internal modifications accrue.
+
+Naturally, specific build versions (ideally created by an automated CI/CD system) can be tagged (saved) and retained for time eternal as an artifact. Thus, this allows for a stable production workflow while supporting a continuously iterating research workflow.
+
+---
+
+## An Overview of How Docker _images Work
+
+Below is an overview of the key definitions/terminology to be aware of, and a high-level view of how a Docker image is constructed.
+
+### Definitions: Container vs Image
+
+This is defined nicely by this [online article](https://phoenixnap.com/kb/docker-image-vs-container), with the most essential tidbits quoted here:
+
+> A Docker image is an immutable (unchangeable) file that contains the source code, libraries, dependencies, tools, and other files needed for an application to run. Due to their read-only quality, these _images are sometimes referred to as snapshots. They represent an application and its virtual environment at a specific point in time. This consistency is one of the great features of Docker. It allows developers to test and experiment software in stable, uniform conditions. Since _images are, in a way, just templates, you cannot start or run them. What you can do is use that template as a base to build a container. A container is, ultimately, just a running image. Once you create a container, it adds a writable layer on top of the immutable image, meaning you can now modify it.
+
+> A Docker container is a virtualized run-time environment where users can isolate applications from the underlying system. These containers are compact, portable units in which you can start up an application quickly and easily. A valuable feature is the standardization of the computing environment running inside the container. Not only does it ensure your application is working in identical circumstances, but it also simplifies sharing with other teammates. As containers are autonomous, they provide strong isolation, ensuring they do not interrupt other running containers, as well as the server that supports them. Docker claims that these units “provide the strongest isolation capabilities in the industry”. Therefore, you won’t have to worry about keeping your machine secure while developing an application.

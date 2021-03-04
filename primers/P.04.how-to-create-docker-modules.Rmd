@@ -1,0 +1,77 @@
+---
+title: "Creating Custom Docker Modules"
+description: |
+  Creating your own Docker modules (almost) from scratch.
+author:
+  - name: Robert A. Amezquita, PhD
+    orcid_id: 0000-0001-6868-7193
+date: "`r Sys.Date()`"
+output: distill::distill_article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+Within the `msilauncher` repo, the `templates/` directory provides skeletons used throughout the repo for the creation of the submodules. Here I'll detail some of the handy templates provided to make modules both easier to develop and more standardized with respect to the `msiverse` computing infrastructure already available.
+
+## Provided Templates
+
+Below are the key templates provided as part of the `msiartifact`/`msilauncher` repos.
+
+### Common Functions
+
+The `common-functions` directory provides a template for how to write a function that can be used across modules. These common functions can be added into the `helpers` directory described below.
+
+### Dockerfiles
+
+Template Dockerfile specs that serve as the skeleton for new modules.
+
+### Tests
+
+Example of a unit/functional test to ensure a module's or series thereof functionality.
+
+### Modules
+
+The core of this templates directory that contains the module skeleton.
+
+## Structure of a Module
+
+Each module in this repo has:
+
+- `helpers` - (convenience) functions that are sourced into the main script to assist in execution; if using the `template.sh` skeleton, this must be included
+- `resources` - any additional files (installers, small genome supplementary files, etc.) are stored here
+- `Dockerfile` - the build instructions for the module
+- `README.md` - a description of the module and instructions for basic usage
+- `entrypoint.sh` - the script that kicks off the core script, `<module>.sh`
+- `<module>.sh` - the core of the Docker executable, this is what is run and forms the module's compute routine; requires the `helpers` directory of functions to run as it is currently structured; based on `template.sh`
+
+Let's go in more depth on the core `<module>.sh` organization..
+
+## The Core Computational Executable
+
+The `<module>.sh` file contains the core compute logic of the module. Of course, any script will do, but this skeleton provides a useful template for a bash-based CLI interface.
+
+The sections are fairly self explanatory, but here they are nonetheless.
+
+**Note that the sequence of this structure must be maintained in order for the skeleton to work.**
+
+- _top comment block_ - provides the title and a brief description of the module, as well as date/author/news
+- _main program_ (`_mainScripts()`)- the core script that will perform the compute logic desired; note at the top how it grabs arguments from the user upon runtime
+- _load helpers_ - no need to modify this section unless new helpers
+- _set defaults_ - for any arguments provided via the CLI, these are the defaults for flags, variables, etc. For optional arguments, I recommend setting a string such as `NULL`.
+- _help message_ - the description that will be provided upon invoking `-h`
+- _parseOptions_ - where the options are parsed; the top section parses apart the provided arguments, and the section below sets their variables to the user provided values if provided. Examples for both flags and options (arguments that take on user-provided values) are here.
+- _initialize and run_ - the final section that runs the script with some extra lines provided for debugging or global variables such as how to treat empty strings (e.g. `shopt`).
+
+### A Note on Structuring Arguments
+
+A typical CLI is structured as such:
+
+```sh
+<program> <options> <flags> <positional arg 1> <positional arg 2> <...>
+```
+
+For this template, "options" are those where the user provides some value; "flags" are binary switches where their presence or absence denotes the setting; "positional arguments" are provided at the end and correspond to required _resources/inputs/outputs necessary to run the executable.
+
+For positional arguments, these are interpreted in the `_mainScript_()` section by invoking `${args[1]}`, where the `1` can be replaced with any numeric index corresponding to the positional of choice.
