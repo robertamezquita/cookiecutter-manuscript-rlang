@@ -14,7 +14,8 @@
 # This contains a pre-installed R (+tidyverse) image that can be used
 # to build off of.
 #
-# To learn more about the image and available extra toolings, see the repo.
+# To learn more about this image, see the rocker-org repo above to check out 
+# the extra rocker scripts and available base images.
 # To learn more about the use of Docker and building images (working with
 # containers), see the docker 
 #
@@ -41,10 +42,10 @@ RUN /custom_scripts/stats-and-ml/install_tidymodels.sh
 RUN /custom_scripts/seq-utils/install_py-seq-utils.sh
 
 # Single-cell (scanpy, bioconductor, seurat, monocle3) ---
-RUN /custom_scripts/single-cell-frameworks/install_py-single-cell.sh
-RUN /custom_scripts/single-cell-frameworks/install_r-bioc-single-cell.sh
-RUN /custom_scripts/single-cell-frameworks/install_seurat.sh
-RUN /custom_scripts/single-cell-frameworks/install_monocle3.sh
+RUN /custom_scripts/single-cell/install_py-single-cell.sh
+RUN /custom_scripts/single-cell/install_r-bioc-single-cell.sh
+RUN /custom_scripts/single-cell/install_seurat.sh
+RUN /custom_scripts/single-cell/install_monocle3.sh
 
 # Misc seq tools ---
 RUN /custom_scripts/install_cli-seq-utils.sh
