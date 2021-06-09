@@ -1,15 +1,22 @@
-name: "test"
+name: "{{cookiecutter.project_name}}"
 title: "{{cookiecutter.project_name}}"
 description: |
   "{{cookiecutter.project_desc}}"
-
 # ---
-include: ["_resources", "_figures", "_tables"]
+include:
+  [
+    "_store-data",
+    "_store-figures",
+    "_store-resources",
+    "_store-tables",
+    "renv",
+    "_notebooks",
+  ]
 exclude: ["*.afdesign", "*.afpub", "*.ai"]
-output_dir: "../_site" # assumes site is rendered inside _build dir
+output_dir: "_site" # assumes site is rendered inside _build dir
 navbar:
   logo:
-    image: _figures/_assets/logo.png
+    image: _store-resources/_assets/logo.png
   search: true
   right:
     - text: "Home"
@@ -18,12 +25,16 @@ navbar:
       href: about.html
     - text: "Articles"
       menu:
-        - text: "Section 1"
-        - text: "Article 1"
-          href: 01-01_article.html
-        - text: "Section 2"
-        - text: "Article 1"
-          href: 02-01_article.html
+        - text: "Objective 1"
+        - text: "Step1"
+          href: 01-01_first-step.html
+        - text: "Step2"
+          href: 01-02_second-step.html
+        - text: "Objective 2"
+        - text: "Step1"
+          href: 02-01_first-step.html
+        - text: "Step2"
+          href: 02-02_second-step.html
     - icon: fab fa-github
       href: "{{cookiecutter.project_url}}"
 

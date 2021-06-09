@@ -1,7 +1,8 @@
-all: clean build render remove-build
+
+all: clean build render remove-rmd
 
 clean:
-	rm -Rf _build/; rm -Rf _site/
+	rm -Rf _site/
 	
 build:
 	./_make-site.sh build
@@ -9,8 +10,5 @@ build:
 render:
 	./_make-site.sh render
 
-remove-build:
-	rm -Rf _build
-
-preview:
-	./_compose-manuscript.sh
+remove-rmd:
+	rm *.Rmd
